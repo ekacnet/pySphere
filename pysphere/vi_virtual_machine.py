@@ -48,6 +48,7 @@ class VIVirtualMachine(VIManagedEntity):
         self._disks = []
         self._files = {}
         self._devices = {}
+        self._num_interfaces = 0
         self.__current_snapshot = None
         self._resource_pool = None
         self.properties = None
@@ -1912,7 +1913,10 @@ class VIVirtualMachine(VIManagedEntity):
             self._server._proxy.ValidateCredentialsInGuest(request)
         except (VI.ZSI.FaultException), e:
             raise VIApiException(e)
-    
+
+    def get_num_interfaces(self):
+        return self._num_interfaces
+
     def __update_properties(self):
         """Refreshes the properties retrieved from the virtual machine
         (i.e. name, path, snapshot tree, etc). To reduce traffic, all the
@@ -1935,6 +1939,7 @@ class VIVirtualMachine(VIManagedEntity):
                 if hasattr(dev,'macAddress'):
                     d['macAddress'] = dev.macAddress
                     d['addressType'] = getattr(dev,'addressType',None)
+                    self._num_interfaces += 1
                 # Video Card
                 if hasattr(dev,'videoRamSizeInKB'):
                     d['videoRamSizeInKB'] = dev.videoRamSizeInKB
@@ -2085,6 +2090,7 @@ class ToolsStatus:
 
     #VMware Tools is running, but the version is not current.
     RUNNING_OLD     = 'RUNNING OLD'
-
     #Couldn't obtain the status of the VMwareTools.
+
     UNKNOWN         = 'UNKNOWN'
+
